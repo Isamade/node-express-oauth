@@ -45,10 +45,12 @@ app.get('/user-info', (req, res) => {
 			const userWithRestrictedFields = {};
 			const scope = userInfo.scope.split(" ");
 			for(let i = 0; i < scope.length; i++){
-				const field = scope[i].slice("permissions:".length);
+				const field = scope[i].slice("permission:".length);
 				userWithRestrictedFields[field] = user[field];
 			}
 			res.json(userWithRestrictedFields)
+		} else {
+			res.status(401).end();
 		}
 	} else {
 		res.status(401).end();
