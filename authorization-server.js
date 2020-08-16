@@ -12,7 +12,7 @@ const {
 
 const config = {
 	port: 9001,
-	privateKey: fs.readFileSync("assets/private_key.pem", 'utf8'),
+	privateKey: fs.readFileSync("assets/private_key.pem"),
 
 	clientId: "my-client",
 	clientSecret: "zETqHgl0d7ThysUqPnaFuLOmG1E=",
@@ -90,11 +90,8 @@ app.post('/token', (req, res) => {
 		if(clients[clientId].clientSecret === clientSecret && authorizationCodes[req.body.code]){
 			let obj = authorizationCodes[req.body.code];
 			delete authorizationCodes[req.body.code];
-			let keyData = config.privateKey;
-			jwt.sign({userName: obj.userName, scope: obj.clientReq.scope}, keyData, { algorithm: 'RS256' }, function(err, token) {
-				if (err) throw (err);				
-				res.json(JSON.stringify({access_token: token, token_type: "Bearer"}));
-			})
+			const token = jwt.sign({userName: obj.userName, scope: obj.clientReq.scope}, config.privateKey, { algorithm: 'RS256', expiresIn: 300, issuer: "http://localhost:" + config.port});			
+			res.json({access_token: token, token_type: "Bearer", scope: obj.clientReq.scope});
 		} else {
 			res.status(401).end();
 		}
